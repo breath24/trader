@@ -13,7 +13,7 @@ export default function Home() {
     return (
         <div style={{ textAlign: "center", marginTop: "50px" }}>
             <h1>{message}</h1>
-            <p>Start trading smarter with Easy Trade 🚀</p>
+            <p>Start trading smarter with Easy Info 🚀</p>
         </div>
     );
 }
