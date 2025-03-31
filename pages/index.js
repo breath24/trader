@@ -15,8 +15,15 @@ function Home() {
     const [showMarkdownNavigator, setShowMarkdownNavigator] = useState(false);
     const [markdownContent, setMarkdownContent] = useState("");
 
-    const handleBeginnerClick = () => {
-        setShowMarkdownNavigator(false);
+    const handleBeginnerClick = async() => {
+        try {
+            const response = await fetch("/trading-basics.md"); // Fetch the Markdown file
+            const text = await response.text();
+            setMarkdownContent(text);
+            setShowMarkdownNavigator(true);
+        } catch (error) {
+            console.error("Error loading Markdown file:", error);
+        }
     };
 
     const handleStocksClick = async () => {
