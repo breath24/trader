@@ -21,7 +21,8 @@ const MarkdownNavigator = ({ markdownText }) => {
             style={{
                 textAlign: "left",
                 fontFamily: "Arial, sans-serif",
-                minHeight: "100vh",
+                //minHeight: "100vh",
+                height: "100%", // Dynamically adjust height based on content
                 padding: "20px",
                 backgroundColor: "#f9f9f9",
             }}
