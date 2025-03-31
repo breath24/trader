@@ -1,19 +1,127 @@
 import { useState, useEffect } from "react";
+import MarkdownNavigator from "../components/MarkdownNavigator";
+import SectionContent from "../components/SectionContent";
+import ErrorBoundary from "../components/ErrorBoundary";
 
-export default function Home() {
-    const [message, setMessage] = useState("Loading...");
+export default function App() {
+    return (
+        <ErrorBoundary>
+            <Home />
+        </ErrorBoundary>
+    );
+}
 
-    useEffect(() => {
-        fetch("/api/trade")
-            .then((res) => res.json())
-            .then((data) => setMessage(data.message))
-            .catch((err) => console.error(err));
-    }, []);
+function Home() {
+    const [showMarkdownNavigator, setShowMarkdownNavigator] = useState(false);
+    const [markdownContent, setMarkdownContent] = useState("");
+
+    const handleBeginnerClick = () => {
+        setShowMarkdownNavigator(false);
+    };
+
+    const handleStocksClick = async () => {
+        try {
+            const response = await fetch("/stocks.md"); // Fetch the Markdown file
+            const text = await response.text();
+            setMarkdownContent(text);
+            setShowMarkdownNavigator(true);
+        } catch (error) {
+            console.error("Error loading Markdown file:", error);
+        }
+    };
+
+    const handleBackClick = () => {
+        setShowMarkdownNavigator(false);
+    };
+
+    if (showMarkdownNavigator) {
+        return <MarkdownNavigator markdownText={markdownContent} />;
+    }
+
+    const Card = ({ title, description, onClick }) => (
+        <div
+            style={{
+                border: "1px solid #ccc",
+                padding: "20px",
+                borderRadius: "10px",
+                width: "200px",
+                backgroundColor: "white",
+            }}
+        >
+            <h3>{title}</h3>
+            <p>{description}</p>
+            <button
+                onClick={onClick}
+                style={{
+                    padding: "10px 20px",
+                    marginTop: "20px",
+                    cursor: "pointer",
+                }}
+            >
+                Start Learning
+            </button>
+        </div>
+    );
 
     return (
-        <div style={{ textAlign: "center", marginTop: "50px" }}>
-            <h1>{message}</h1>
-            <p>Start trading smarter with Easy Info 🚀</p>
+        <div
+            style={{
+                textAlign: "center",
+                fontFamily: "Arial, sans-serif",
+                minHeight: "100vh",
+                padding: "0 20px",
+            }}
+        >
+            <div
+                style={{
+                    width: "100%",
+                    height: "200px",
+                    backgroundImage: "url('/trading-pic.png')",
+                    backgroundSize: "cover",
+                    backgroundPosition: "center",
+                    backgroundRepeat: "no-repeat",
+                    marginBottom: "30px",
+                }}
+            ></div>
+            <div
+                style={{
+                    backgroundColor: "white",
+                    borderRadius: "15px",
+                    padding: "30px",
+                    maxWidth: "1000px",
+                    margin: "0 auto",
+                    boxShadow: "0 4px 8px rgba(0,0,0,0.1)",
+                }}
+            >
+                <div style={{ marginTop: "10px" }}>
+                    <h1> Upward Journey to Trading 🚀</h1>
+                    <div
+                        style={{
+                            display: "flex",
+                            justifyContent: "center",
+                            gap: "20px",
+                            marginTop: "20px",
+                            flexWrap: "wrap",
+                        }}
+                    >
+                        <Card
+                            title="Basics"
+                            description="Learn the basics of trading and get started on your journey."
+                            onClick={handleBeginnerClick}
+                        />
+                        <Card
+                            title="Stocks"
+                            description="Learn how to trade stocks."
+                            onClick={handleStocksClick}
+                        />
+                        <Card
+                            title="Strategies"
+                            description="Master trading with expert-level techniques and insights."
+                            onClick={() => {}}
+                        />
+                    </div>
+                </div>
+            </div>
         </div>
     );
 }
