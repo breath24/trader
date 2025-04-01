@@ -2,10 +2,11 @@ import React, { useState } from "react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm"; // Import the plugin for GitHub-flavored Markdown
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"; // Import Font Awesome
-import { faVolumeUp } from "@fortawesome/free-solid-svg-icons"; // Import the speaker icon
+import { faVolumeUp, faPause, faHome } from "@fortawesome/free-solid-svg-icons"; // Import icons
 
-const MarkdownNavigator = ({ markdownText }) => {
+const MarkdownNavigator = ({ markdownText, handleBackClick }) => {
     const [currentSection, setCurrentSection] = useState(0);
+    const [isReading, setIsReading] = useState(false); // Track if speech is playing or paused
 
     // Split the markdown text into sections based on headings (e.g., ## or ###)
     const sections = markdownText.split(/^##\s+/gm).filter((section) => section.trim() !== "");
@@ -13,6 +14,7 @@ const MarkdownNavigator = ({ markdownText }) => {
     const handleNext = () => {
         // Stop any ongoing speech synthesis
         window.speechSynthesis.cancel();
+        setIsReading(false); // Reset reading state
 
         // Move to the next section
         setCurrentSection((prev) => Math.min(prev + 1, sections.length - 1));
@@ -21,19 +23,36 @@ const MarkdownNavigator = ({ markdownText }) => {
     const handlePrevious = () => {
         // Stop any ongoing speech synthesis
         window.speechSynthesis.cancel();
+        setIsReading(false); // Reset reading state
 
         // Move to the previous section
         setCurrentSection((prev) => Math.max(prev - 1, 0));
     };
 
-    const handleReadText = () => {
-        const textToRead = sections[currentSection];
+    const handleReadPauseToggle = () => {
+        if (isReading) {
+            // Pause the speech
+            window.speechSynthesis.pause();
+            setIsReading(false);
+        } else {
+            // Resume or start the speech
+            const textToRead = sections[currentSection];
 
-        // Remove Markdown formatting (e.g., #, **, etc.)
-        const plainText = textToRead.replace(/[#_*~`>[\]]/g, "").replace(/\*\*(.*?)\*\*/g, "$1");
+            // Remove Markdown formatting (e.g., #, **, etc.)
+            const plainText = textToRead.replace(/[#_*~`>[\]]/g, "").replace(/\*\*(.*?)\*\*/g, "$1");
 
-        const utterance = new SpeechSynthesisUtterance(plainText);
-        window.speechSynthesis.speak(utterance);
+            if (window.speechSynthesis.speaking && window.speechSynthesis.paused) {
+                // Resume if paused
+                window.speechSynthesis.resume();
+            } else {
+                // Start new speech
+                const utterance = new SpeechSynthesisUtterance(plainText);
+                utterance.onend = () => setIsReading(false); // Reset state when speech ends
+                window.speechSynthesis.speak(utterance);
+            }
+
+            setIsReading(true);
+        }
     };
 
     return (
@@ -57,15 +76,15 @@ const MarkdownNavigator = ({ markdownText }) => {
                     boxShadow: "0 4px 8px rgba(0,0,0,0.1)",
                 }}
             >
-                {/* Speaker Icon Button */}
+                {/* Speak/Pause Icon Button */}
                 <button
-                    onClick={handleReadText}
+                    onClick={handleReadPauseToggle}
                     style={{
                         position: "absolute", // Position the button absolutely
                         top: "10px", // Distance from the top of the container
-                        right: "10px", // Distance from the right of the container
+                        right: "70px", // Distance from the right of the container
                         padding: "10px",
-                        backgroundColor: "#4CAF50",
+                        backgroundColor: isReading ? "#FFA500" : "#4CAF50", // Orange for pause, green for play
                         color: "white",
                         border: "none",
                         borderRadius: "50%",
@@ -79,7 +98,32 @@ const MarkdownNavigator = ({ markdownText }) => {
                         alignItems: "center",
                     }}
                 >
-                    <FontAwesomeIcon icon={faVolumeUp} size="lg" />
+                    <FontAwesomeIcon icon={isReading ? faPause : faVolumeUp} size="lg" />
+                </button>
+
+                {/* Home Icon Button */}
+                <button
+                    onClick={handleBackClick} // Call the handleBackClick function
+                    style={{
+                        position: "absolute", // Position the button absolutely
+                        top: "10px", // Distance from the top of the container
+                        right: "10px", // Distance from the right of the container
+                        padding: "10px",
+                        backgroundColor: "#FF5733",
+                        color: "white",
+                        border: "none",
+                        borderRadius: "50%",
+                        fontWeight: "bold",
+                        cursor: "pointer",
+                        boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
+                        width: "50px",
+                        height: "50px",
+                        display: "flex",
+                        justifyContent: "center",
+                        alignItems: "center",
+                    }}
+                >
+                    <FontAwesomeIcon icon={faHome} size="lg" />
                 </button>
 
                 {/* Markdown Content */}

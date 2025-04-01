@@ -162,8 +162,7 @@ function Home() {
     return (
         <PageContainer>
             <HeaderImage />
-            {showMarkdownNavigator === false ? Options : <MarkdownNavigator markdownText={markdownContent} />}
-            {showMarkdownNavigator && <BackButton />}
+            {showMarkdownNavigator === false ? Options : <MarkdownNavigator markdownText={markdownContent} handleBackClick={handleBackClick} />}
         </PageContainer>
     );
 }
